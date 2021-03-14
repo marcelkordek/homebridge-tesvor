@@ -1,0 +1,53 @@
+{
+  "pluginAlias": "HomebridgeTesvor",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "username": {
+        "title": "Username",
+        "type": "string",
+        "required": true,
+        "default": "Username"
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "required": true,
+        "default": "Password"
+      },
+      "country": {
+        "title": "Country",
+        "type": "string",
+        "required": true,
+        "default": "+49"
+      },
+      "startMode": {
+        "title": "Start Mode",
+        "type": "string",
+        "default": "AutoClean",
+        "oneOf": [
+          { "title": "AutoClean", "enum": ["AutoClean"] },
+          { "title": "EdgeClean", "enum": ["EdgeClean"] },
+          { "title": "SpotClean", "enum": ["SpotClean"] },
+          { "title": "RoomClean", "enum": ["RoomClean"] },
+          { "title": "SmartClean", "enum": ["SmartClean"] }
+        ],
+        "description": "Select the Start Mode",
+        "required": true
+      },
+      "stopMode": {
+        "title": "Stop Mode",
+        "type": "string",
+        "default": "BackCharging",
+        "oneOf": [
+          { "title": "BackCharging", "enum": ["BackCharging"] },
+          { "title": "Standby", "enum": ["Standby"] }
+        ],
+        "description": "Select the Stop Mode",
+        "required": true
+      }
+    }
+  }
+}
