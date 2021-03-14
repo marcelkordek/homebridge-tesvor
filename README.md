@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="homebridge-tesvor.svg" height="200px">  
+</p>
+<span align="center">
+
 # Homebridge Tesvor
 
 [![Downloads](https://img.shields.io/npm/dt/homebridge-tesvor)](https://www.npmjs.com/package/homebridge-tesvor)
@@ -33,9 +38,9 @@ $ sudo npm install -g homebridge-tesvor@beta
 
 	"platforms": [
         {
-            "username": "USER",
-            "password": "PASS",
-            "country": "+49",
+            "username": "USER", # E-Mail or Phone (Phone without Country-Code) e.g 123456 not +49123456
+            "password": "PASS", # "Account Password."
+            "country": "+49", # Country-Code
             "startMode": "AutoClean",
             "stopMode": "BackCharging",
             "platform": "HomebridgeTesvor"
