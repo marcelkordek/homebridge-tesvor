@@ -1,7 +1,7 @@
 # Homebridge Tesvor
 
 [![npm](https://img.shields.io/npm/v/homebridge-tesvor?style=flat-square)](https://www.npmjs.com/package/homebridge-tesvor) [![npm bundle size](https://img.shields.io/bundlephobia/min/homebridge-harman-kardon-avr?style=flat-square)](https://github.com/marcelkordek/homebridge-tesvor)
-[![GitHub last commit](https://img.shields.io/github/last-commit/marcelkordek/homebridge-harman-kardon-avr?style=flat-square)](https://github.com/marcelkordek/homebridge-tesvor)
+[![GitHub last commit](https://img.shields.io/github/last-commit/marcelkordek/homebridge-tesvor?style=flat-square)](https://github.com/marcelkordek/homebridge-tesvor)
 
 This is a plugin for [Homebridge](https://github.com/nfarina/homebridge) to control your **Tesvor Cleaning Vacuum.** 
 
