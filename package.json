@@ -2,7 +2,7 @@
   "private": true,
   "displayName": "Homebridge Tesvor",
   "name": "homebridge-tesvor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Homebridge Plugin for Tesvor Robot Vacuum",
   "license": "Apache-2.0",
   "repository": {
