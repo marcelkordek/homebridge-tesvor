@@ -34,13 +34,13 @@
 		</g>
 		<g id="Logo">
 			
-				<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="450" y1="97.5" x2="450" y2="-202.5" gradientTransform="matrix(1 0 0 -1 0 184)">
+				<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="450" y1="982.5" x2="450" y2="1282.5" gradientTransform="matrix(1 0 0 1 0 -896)">
 				<stop  offset="0" style="stop-color:#57277C"/>
 				<stop  offset="1" style="stop-color:#491F59"/>
 			</linearGradient>
 			<circle class="st1" cx="450" cy="236.5" r="150"/>
 			
-				<radialGradient id="SVGID_2_" cx="450" cy="-52.5" r="150" gradientTransform="matrix(1 0 0 -1 0 184)" gradientUnits="userSpaceOnUse">
+				<radialGradient id="SVGID_2_" cx="450" cy="1132.5" r="150" gradientTransform="matrix(1 0 0 1 0 -896)" gradientUnits="userSpaceOnUse">
 				<stop  offset="0" style="stop-color:#000000;stop-opacity:0"/>
 				<stop  offset="1" style="stop-color:#000000;stop-opacity:0.1"/>
 			</radialGradient>
@@ -62,8 +62,8 @@
 		<line class="st4" x1="902" y1="64.2" x2="902" y2="564.2"/>
 	</g>
 </g>
-<image style="overflow:visible;" width="200" height="24" xlink:href="../../../../../private/var/folders/cq/34cq6wzn62747498r_9ybf9h0000gn/T/tesvor-logo.png"  transform="matrix(3.1446 0 0 3.1446 1037.0677 441.9603)">
+<image style="overflow:visible;enable-background:new    ;" width="200" height="24" xlink:href="../../../../../private/var/folders/cq/34cq6wzn62747498r_9ybf9h0000gn/T/tesvor-logo.png"  transform="matrix(3.1446 0 0 3.1446 1037.0677 441.9603)">
 </image>
-<image style="overflow:visible;" width="200" height="200" xlink:href="../../../../../private/var/folders/cq/34cq6wzn62747498r_9ybf9h0000gn/T/tesvor-ico_1.png"  transform="matrix(1.4965 0 0 1.4965 1201.8746 86.8453)">
+<image style="overflow:visible;enable-background:new    ;" width="200" height="200" xlink:href="../../../../../private/var/folders/cq/34cq6wzn62747498r_9ybf9h0000gn/T/tesvor-ico_1.png"  transform="matrix(1.4965 0 0 1.4965 1201.8746 86.8453)">
 </image>
 </svg>
