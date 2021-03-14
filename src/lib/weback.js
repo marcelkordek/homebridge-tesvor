@@ -1,6 +1,6 @@
 'use strict';
 
-const request = require("request");
+const got = require('got');
 const crypto = require('crypto')
 const AWS = require("aws-sdk");
 const AWSIot = require("aws-iot-device-sdk");
@@ -46,16 +46,12 @@ module.exports = class Weback {
                 "Password": crypto.createHash('md5').update(this.password).digest("hex"),
                 "User_Account": this.country_code + '-' + this.username
             }
-            request({
-                url: "https://www.weback-login.com/WeBack/WeBack_Login_Ats_V3",
-                method: "POST",
-                json: true,
-                body: payload
-            }, function (error, resp, body) {
-                //console.log(body)
-                //getCredentials(body.Region_Info, body.Identity_Id, body.Token)
-                resolve(body)
-            })
+
+            const { body } = await got.post('https://www.weback-login.com/WeBack/WeBack_Login_Ats_V3', {
+                json: payload,
+                responseType: 'json'
+            });
+            resolve(body)
         })
     }
 
