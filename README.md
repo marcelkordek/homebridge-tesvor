@@ -1,7 +1,6 @@
 <p align="center">
   <img src="homebridge-tesvor.png" height="200px">  
 </p>
-<span align="center">
 
 # Homebridge Tesvor
 
