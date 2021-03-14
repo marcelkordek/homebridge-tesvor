@@ -28,6 +28,7 @@
     "publish:patch": "npm version patch && git push --tags && npm publish",
     "publish:minor": "npm version minor && git push --tags && npm publish",
     "publish:major": "npm version major && git push --tags && npm publish",
+    "publish:beta": "npm version prepatch --preid beta && git push --tags && npm publish --tag=beta",
     "lint": "eslint src/**.ts --max-warnings=0",
     "lint:fix": "eslint --fix src/**.ts --max-warnings=0",
     "watch": "npm run build && npm link && nodemon",
