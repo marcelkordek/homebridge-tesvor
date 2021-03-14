@@ -13,13 +13,22 @@
     "dist"
   ],
   "rules": {
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-this-alias": [
+      "error",
+      {
+        "allowDestructuring": true, // Allow `const { props, state } = this`; false by default
+        "allowedNames": ["_this"] // Allow `const self = this`; `[]` by default
+      }
+    ],
+    "consistent-this": [2, "_this"],
     "quotes": ["warn", "single"],
     "indent": ["warn", 2, { "SwitchCase": 1 }],
     "semi": ["off"],
     "comma-dangle": ["warn", "always-multiline"],
     "dot-notation": "off",
     "eqeqeq": "warn",
-    "curly": ["warn", "all"],
+    "curly": ["warn", "multi-line"],
     "brace-style": ["warn"],
     "prefer-arrow-callback": ["warn"],
     "max-len": ["warn", 140],

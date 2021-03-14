@@ -1,6 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue, Logger } from 'homebridge';
 import { TesvorPlatform } from './platform';
-const vacuum = require("./lib/vacuum.js");
+const vacuum = require('./lib/vacuum.js');
 
 /**
  * Platform Accessory
@@ -15,8 +15,9 @@ export class TesvorAccessory {
    * You should implement your own code to track the state of your accessory
    */
   private state = {
-    On: false
+    On: false,
   };
+
   private weback;
 
   constructor(
@@ -27,7 +28,7 @@ export class TesvorAccessory {
     // weback
     const weback = accessory.context.weback;
     this.weback = weback;
-    
+
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tesvor')
@@ -51,28 +52,29 @@ export class TesvorAccessory {
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
-    var _this = this
-    this.weback.getConnection().then(function (client) {
+    //const _this = this
+    this.weback.getConnection().then((client) => {
 
-        var deviceTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/update/delta'
-        client.subscribe(deviceTopic);
-        client.on('message', function (topic, msg) {
-            if(topic != deviceTopic) return;
-            //console.log(topic)
-            //console.log(msg.toString())
-            const message = JSON.parse(msg.toString())
-
-            if(message.state.hasOwnProperty('working_status')){
-              //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
-              var mode = message.state.working_status
-              var state = vacuum.isCleaning(mode)
-              _this.state.On = state;
-              _this.log.debug(mode)
-              //_this.log.debug(state)
-              _this.service.updateCharacteristic(_this.platform.Characteristic.On, state);
-            }
-        })
-    })
+      const deviceTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/update/delta';
+      client.subscribe(deviceTopic);
+      client.on('message', (topic, msg) => {
+        if (topic !== deviceTopic) return;
+        //console.log(topic)
+        //console.log(msg.toString())
+        const message = JSON.parse(msg.toString());
+        // Object.prototype.hasOwnProperty.call(foo, "bar")
+        // message.state.hasOwnProperty('working_status')
+        if (Object.prototype.hasOwnProperty.call(message, 'working_status')) {
+          //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
+          const mode = message.state.working_status;
+          const state = vacuum.isCleaning(mode);
+          this.state.On = state;
+          this.log.debug(mode);
+          //_this.log.debug(state)
+          this.service.updateCharacteristic(this.platform.Characteristic.On, state);
+        }
+      });
+    });
 
     // // register handlers for the Brightness Characteristic
     // this.service.getCharacteristic(this.platform.Characteristic.Brightness)
@@ -127,8 +129,8 @@ export class TesvorAccessory {
     // implement your own code to turn your device on/off
     this.state.On = value as boolean;
     //const mode = this.state.On ? 'AutoClean' : 'BackCharging' //Standby
-    const mode = this.state.On ? this.accessory.context.modes.startMode : this.accessory.context.modes.stopMode
-    this.weback.publish_device_msg(this.accessory.context.device.thingName, {working_status: mode})
+    const mode = this.state.On ? this.accessory.context.modes.startMode : this.accessory.context.modes.stopMode;
+    this.weback.publish_device_msg(this.accessory.context.device.thingName, { working_status: mode });
 
     this.platform.log.debug('Set Characteristic On ->', value);
   }

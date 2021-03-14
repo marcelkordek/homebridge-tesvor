@@ -16,6 +16,12 @@ After [Homebridge](https://github.com/nfarina/homebridge) has been installed:
 $ sudo npm install -g homebridge-tesvor
 ```
 
+or
+
+```
+$ sudo npm install -g homebridge-tesvor@beta
+```
+
 ## Basic configuration
 
  ```

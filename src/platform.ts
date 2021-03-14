@@ -3,7 +3,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { TesvorAccessory } from './platformAccessory';
 //import { Weback } from './lib/weback.js'
-const Weback = require("./lib/weback.js");
+const Weback = require('./lib/weback.js');
 
 /**
  * HomebridgePlatform
@@ -53,56 +53,55 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   async discoverDevices() {
-    const _this = this
+    //const _this = this;
     //this.log.info('Config', this.config);
-    const weback = new Weback(this.config.username, this.config.password, this.config.country)
+    const weback = new Weback(this.config.username, this.config.password, this.config.country);
 
-    const startMode = this.config.startMode
-    const stopMode = this.config.stopMode
+    const startMode = this.config.startMode;
+    const stopMode = this.config.stopMode;
 
-    weback.device_list().then(function (devices) {
+    weback.device_list().then((devices) => {
       //console.log(devices)
       for (const device of devices) {
-        weback.get_device_description(device).then(function (thing) {
+        weback.get_device_description(device).then((thing) => {
           //console.log(thing)
           //console.log(thing.thingId)
-          var nickname = thing.Thing_Nick_Name
+          const nickname = thing.Thing_Nick_Name;
           //console.log(nickname)
 
-          const uuid = _this.api.hap.uuid.generate(thing.thingId);
-          const existingAccessory = _this.accessories.find(accessory => accessory.UUID === uuid);
+          const uuid = this.api.hap.uuid.generate(thing.thingId);
+          const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
           if (existingAccessory) {
-            _this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
             //existingAccessory.context.device = thing
             //_this.api.updatePlatformAccessories([existingAccessory]);
             existingAccessory.context.device = thing;
             existingAccessory.context.nickname = nickname;
             existingAccessory.context.weback = weback;
-            existingAccessory.context.modes = {startMode: startMode, stopMode: stopMode};
-            _this.api.updatePlatformAccessories([existingAccessory]);
-            
-            new TesvorAccessory(_this, existingAccessory, _this.log);
+            existingAccessory.context.modes = { startMode: startMode, stopMode: stopMode };
+            this.api.updatePlatformAccessories([existingAccessory]);
+
+            new TesvorAccessory(this, existingAccessory, this.log);
           } else {
             // the accessory does not yet exist, so we need to create it
-            _this.log.info('Adding new accessory:', nickname);
+            this.log.info('Adding new accessory:', nickname);
             // create a new accessory
-            const accessory = new _this.api.platformAccessory(nickname, uuid);
+            const accessory = new this.api.platformAccessory(nickname, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
             accessory.context.device = thing;
             accessory.context.nickname = nickname;
             accessory.context.weback = weback;
-            accessory.context.modes = {startMode: startMode, stopMode: stopMode};
+            accessory.context.modes = { startMode: startMode, stopMode: stopMode };
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
-            new TesvorAccessory(_this, accessory, _this.log);
+            new TesvorAccessory(this, accessory, this.log);
             // link the accessory to your platform
-            _this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+            this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
           }
-
-        })
+        });
       }
-    })
+    });
   }
 }
