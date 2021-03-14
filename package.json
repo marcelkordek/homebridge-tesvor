@@ -2,6 +2,7 @@
   "displayName": "Homebridge Tesvor",
   "name": "homebridge-tesvor",
   "version": "1.0.2",
+  "author": "Marcel Kordek",
   "description": "Homebridge Plugin for Tesvor Robot Vacuum",
   "license": "Apache-2.0",
   "repository": {
@@ -9,7 +10,12 @@
     "url": "git://github.com/marcelkordek/homebridge-tesvor.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/homebridge-tesvor/issues"
+    "url": "https://github.com/marcelkordek/homebridge-tesvor/issues"
+  },
+  "homepage": "https://github.com/marcelkordek/homebridge-tesvor#readme",
+  "funding": {
+    "type": "paypal",
+    "url": "https://www.paypal.me/marcelkorrdek/EUR"
   },
   "engines": {
     "node": ">=10.17.0",

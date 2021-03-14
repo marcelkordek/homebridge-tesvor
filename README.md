@@ -1,5 +1,6 @@
 # Homebridge Tesvor
 
+[![Downloads](https://img.shields.io/npm/dt/homebridge-tesvor)](https://www.npmjs.com/package/homebridge-tesvor)
 [![npm](https://img.shields.io/npm/v/homebridge-tesvor?style=flat-square)](https://www.npmjs.com/package/homebridge-tesvor) [![npm bundle size](https://img.shields.io/bundlephobia/min/homebridge-tesvor?style=flat-square)](https://github.com/marcelkordek/homebridge-tesvor)
 [![GitHub last commit](https://img.shields.io/github/last-commit/marcelkordek/homebridge-tesvor?style=flat-square)](https://github.com/marcelkordek/homebridge-tesvor)
 
