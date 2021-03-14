@@ -9,19 +9,22 @@
         "title": "Username",
         "type": "string",
         "required": true,
-        "default": "Username"
+        "default": "Username",
+        "description": "E-Mail or Phone (Phone without Country-Code) e.g 123456 not +49123456"
       },
       "password": {
         "title": "Password",
         "type": "string",
         "required": true,
-        "default": "Password"
+        "default": "Password",
+        "description": "Account Password."
       },
       "country": {
         "title": "Country",
         "type": "string",
         "required": true,
-        "default": "+49"
+        "default": "+49",
+        "description": "Country-Code e.g +49 for Germany"
       },
       "startMode": {
         "title": "Start Mode",
