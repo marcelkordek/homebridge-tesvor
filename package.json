@@ -34,7 +34,7 @@
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
-    "version": "auto-changelog -p -u && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md'"
+    "version": "auto-changelog -p -u && git add CHANGELOG.md"
   },
   "keywords": [
     "homebridge-plugin",
