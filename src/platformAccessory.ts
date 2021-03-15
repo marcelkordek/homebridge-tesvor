@@ -69,9 +69,13 @@ export class TesvorAccessory {
     this.weback.getConnection().then((client) => {
       this.client = client;
       const deviceTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/update/delta';
+      const getTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/get';
       const getTopicAccepted = '$aws/things/' + accessory.context.device.thingName + '/shadow/get/accepted';
+
       client.subscribe(deviceTopic);
       client.subscribe(getTopicAccepted);
+      client.publish(getTopic, '');
+
       client.on('message', (topic, msg) => {
         if (!topic.includes(accessory.context.device.thingName)) return;
         if (!Object.prototype.hasOwnProperty.call(JSON.parse(msg.toString()), 'state')) return;
@@ -202,8 +206,9 @@ export class TesvorAccessory {
     const isOn = this.state.On;
 
     this.platform.log.debug('Get Characteristic On ->', isOn);
+
     // get state
-    const topic = '$aws/things/' + this.accessory.context.device.thingName + '/get';
+    const topic = '$aws/things/' + this.accessory.context.device.thingName + '/shadow/get';
     this.client.publish(topic, '');
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
@@ -216,7 +221,7 @@ export class TesvorAccessory {
     // set this to a valid value for StatusLowBattery
     const batteryLevel = this.state.BatteryLevel;
     let state = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-    if(batteryLevel < 10){
+    if(batteryLevel < 20){
       state = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
     }
 
