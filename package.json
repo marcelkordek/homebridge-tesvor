@@ -23,7 +23,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "push": "git push",
+    "push": "npm run version && git push --tags",
     "push:version": "npm version patch && git push --tags",
     "publish:patch": "npm version patch && git push --tags && npm publish",
     "publish:minor": "npm version minor && git push --tags && npm publish",
