@@ -23,7 +23,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "push": "npm run version && git push --tags",
+    "push": "git push --tags",
     "push:version": "npm version patch && git push --tags",
     "publish:patch": "npm version patch && git push --tags && npm publish",
     "publish:minor": "npm version minor && git push --tags && npm publish",
@@ -34,7 +34,8 @@
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
-    "version": "auto-changelog -p -u && git add CHANGELOG.md"
+    "version": "auto-changelog -p -u && git add CHANGELOG.md",
+    "prepush": "npm run version"
   },
   "keywords": [
     "homebridge-plugin",
