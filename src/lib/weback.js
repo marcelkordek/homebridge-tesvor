@@ -191,7 +191,7 @@ module.exports = class Weback {
     }
 
     async publish_device_msg(device_name, desired_payload = {}, session = this.aws_session) {
-        if (!session) session = await this.get_session();
+        if (!session || this.is_renewal_required()) session = await this.get_session();
 
         //var endpoint = await this.get_endpoint()
         //var iot_data = new AWS.IotData({ endpoint: endpoint })

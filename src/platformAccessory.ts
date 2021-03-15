@@ -19,6 +19,7 @@ export class TesvorAccessory {
   };
 
   private weback;
+  private client;
 
   constructor(
     private readonly platform: TesvorPlatform,
@@ -54,7 +55,7 @@ export class TesvorAccessory {
 
     //const _this = this
     this.weback.getConnection().then((client) => {
-
+      this.client = client;
       const deviceTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/update/delta';
       client.subscribe(deviceTopic);
       client.on('message', (topic, msg) => {
@@ -130,7 +131,14 @@ export class TesvorAccessory {
     this.state.On = value as boolean;
     //const mode = this.state.On ? 'AutoClean' : 'BackCharging' //Standby
     const mode = this.state.On ? this.accessory.context.modes.startMode : this.accessory.context.modes.stopMode;
-    this.weback.publish_device_msg(this.accessory.context.device.thingName, { working_status: mode });
+    //this.weback.publish_device_msg(this.accessory.context.device.thingName, { working_status: mode });
+    const topic = '$aws/things/' + this.accessory.context.device.thingName + '/shadow/update';
+    const payload = {
+      state: {
+        desired: { working_status: mode },
+      },
+    };
+    this.client.publish(topic, JSON.stringify(payload));
 
     this.platform.log.debug('Set Characteristic On ->', value);
   }
