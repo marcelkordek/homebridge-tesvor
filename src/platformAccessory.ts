@@ -65,7 +65,9 @@ export class TesvorAccessory {
         const message = JSON.parse(msg.toString());
         // Object.prototype.hasOwnProperty.call(foo, "bar")
         // message.state.hasOwnProperty('working_status')
-        if (Object.prototype.hasOwnProperty.call(message, 'working_status')) {
+        //this.log.debug(message)
+        //this.log.debug(Object.prototype.hasOwnProperty.call(message.state, 'working_status').toString())
+        if (Object.prototype.hasOwnProperty.call(message.state, 'working_status')) {
           //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
           const mode = message.state.working_status;
           const state = vacuum.isCleaning(mode);
