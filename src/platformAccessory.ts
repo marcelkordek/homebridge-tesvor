@@ -16,6 +16,8 @@ export class TesvorAccessory {
    */
   private state = {
     On: false,
+    BatteryLevel: 100,
+    Charging: true,
   };
 
   private weback;
@@ -53,15 +55,28 @@ export class TesvorAccessory {
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
+    // create a new Battery service
+    const batteryService = this.accessory.getService(this.platform.Service.Battery) || this.accessory.addService(this.platform.Service.Battery);
+
+    // create handlers for required characteristics
+    batteryService.getCharacteristic(this.platform.Characteristic.StatusLowBattery)
+      .onGet(this.handleStatusLowBatteryGet.bind(this));
+
+    batteryService.getCharacteristic(this.platform.Characteristic.BatteryLevel)
+      .onGet(this.handleBatteryLevelGet.bind(this));
+
     //const _this = this
     this.weback.getConnection().then((client) => {
       this.client = client;
       const deviceTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/update/delta';
+      const getTopicAccepted = '$aws/things/' + accessory.context.device.thingName + '/shadow/get/accepted';
       client.subscribe(deviceTopic);
+      client.subscribe(getTopicAccepted);
       client.on('message', (topic, msg) => {
-        if (topic !== deviceTopic) return;
+        if (!topic.includes(accessory.context.device.thingName)) return;
+        if (!Object.prototype.hasOwnProperty.call(JSON.parse(msg.toString()), 'state')) return;
         //console.log(topic)
-        //console.log(msg.toString())
+        //console.log(JSON.parse(msg.toString())
         const message = JSON.parse(msg.toString());
         // Object.prototype.hasOwnProperty.call(foo, "bar")
         // message.state.hasOwnProperty('working_status')
@@ -71,13 +86,37 @@ export class TesvorAccessory {
           //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
           const mode = message.state.working_status;
           const state = vacuum.isCleaning(mode);
+          const isCharging = vacuum.isCharging(mode);
+          this.state.Charging = isCharging;
           this.state.On = state;
-          this.log.debug(mode);
+          this.log.debug(accessory.context.nickname, mode);
           //_this.log.debug(state)
           this.service.updateCharacteristic(this.platform.Characteristic.On, state);
+          batteryService.updateCharacteristic(this.platform.Characteristic.ChargingState, isCharging);
+        }
+        if (!Object.prototype.hasOwnProperty.call(JSON.parse(msg.toString()).state, 'reported')) return;
+        if (Object.prototype.hasOwnProperty.call(message.state.reported, 'working_status')) {
+          //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
+          const mode = message.state.reported.working_status;
+          const state = vacuum.isCleaning(mode);
+          const isCharging = vacuum.isCharging(mode);
+          this.state.Charging = isCharging;
+          this.state.On = state;
+          this.log.debug(accessory.context.nickname, mode);
+          //_this.log.debug(state)
+          this.service.updateCharacteristic(this.platform.Characteristic.On, state);
+          batteryService.updateCharacteristic(this.platform.Characteristic.ChargingState, isCharging);
+        }
+        if (Object.prototype.hasOwnProperty.call(message.state.reported, 'battery_level')) {
+          //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
+          const battery_level = message.state.reported.battery_level;
+          this.state.BatteryLevel = battery_level;
+          this.log.debug(accessory.context.nickname, battery_level);
+          batteryService.updateCharacteristic(this.platform.Characteristic.BatteryLevel, battery_level);
         }
       });
     });
+
 
     // // register handlers for the Brightness Characteristic
     // this.service.getCharacteristic(this.platform.Characteristic.Brightness)
@@ -163,11 +202,31 @@ export class TesvorAccessory {
     const isOn = this.state.On;
 
     this.platform.log.debug('Get Characteristic On ->', isOn);
+    // get state
+    const topic = '$aws/things/' + this.accessory.context.device.thingName + '/get';
+    this.client.publish(topic, '');
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return isOn;
+  }
+
+  async handleStatusLowBatteryGet(): Promise<CharacteristicValue> {
+    // set this to a valid value for StatusLowBattery
+    const batteryLevel = this.state.BatteryLevel;
+    let state = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+    if(batteryLevel < 10){
+      state = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
+    }
+
+    return state;
+  }
+
+  async handleBatteryLevelGet(): Promise<CharacteristicValue> {
+    // set this to a valid value for StatusLowBattery
+    const batteryLevel = this.state.BatteryLevel;
+    return batteryLevel;
   }
 
   /**
