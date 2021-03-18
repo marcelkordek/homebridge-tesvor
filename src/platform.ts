@@ -1,7 +1,8 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { TesvorAccessory } from './platformAccessory';
+import { SwitchAccessory } from './switchAccessory';
+import { TVAccessory } from './tvAccessory';
 //import { Weback } from './lib/weback.js'
 const Weback = require('./lib/weback.js');
 
@@ -57,8 +58,11 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
     //this.log.info('Config', this.config);
     const weback = new Weback(this.config.username, this.config.password, this.config.country);
 
-    const startMode = this.config.startMode;
-    const stopMode = this.config.stopMode;
+    const startMode = this.config.startMode || 'AutoClean' ;
+    const stopMode = this.config.stopMode || 'Standby' ;
+
+    const accessoryType = this.config.accessoryType || 'Switch' ;
+    const accessoryCategory = this.config.accessoryCategory || 'TV' ;
 
     weback.device_list().then((devices) => {
       //console.log(devices)
@@ -80,9 +84,17 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
             existingAccessory.context.nickname = nickname;
             existingAccessory.context.weback = weback;
             existingAccessory.context.modes = { startMode: startMode, stopMode: stopMode };
+            existingAccessory.context.tv = { accessoryType: accessoryType, accessoryCategory: accessoryCategory };
             this.api.updatePlatformAccessories([existingAccessory]);
-
-            new TesvorAccessory(this, existingAccessory, this.log);
+            switch(accessoryType){
+              case 'TV':
+                new TVAccessory(this, existingAccessory, this.log);
+                break;
+              default:
+                new SwitchAccessory(this, existingAccessory, this.log);
+                break;
+            }
+            //new SwitchAccessory(this, existingAccessory, this.log);
           } else {
             // the accessory does not yet exist, so we need to create it
             this.log.info('Adding new accessory:', nickname);
@@ -94,11 +106,22 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
             accessory.context.nickname = nickname;
             accessory.context.weback = weback;
             accessory.context.modes = { startMode: startMode, stopMode: stopMode };
+            accessory.context.tv = { accessoryType: accessoryType, accessoryCategory: accessoryCategory };
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
-            new TesvorAccessory(this, accessory, this.log);
+            switch(accessoryType){
+              case 'TV':
+                new TVAccessory(this, accessory, this.log);
+                this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+                break;
+              default:
+                new SwitchAccessory(this, accessory, this.log);
+                this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+                break;
+            }
+            //new SwitchAccessory(this, accessory, this.log);
             // link the accessory to your platform
-            this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+            //this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
           }
         });
       }
