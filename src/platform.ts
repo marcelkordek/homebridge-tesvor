@@ -56,7 +56,7 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
   async discoverDevices() {
     //const _this = this;
     //this.log.info('Config', this.config);
-    const weback = new Weback(this.config.username, this.config.password, this.config.country);
+    const weback = new Weback(this.log, this.config.username, this.config.password, this.config.country);
 
     const startMode = this.config.startMode || 'AutoClean' ;
     const stopMode = this.config.stopMode || 'Standby' ;
