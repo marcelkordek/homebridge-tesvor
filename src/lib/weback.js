@@ -114,7 +114,7 @@ module.exports = class Weback {
 
     let weback_data = await this.auth();
     if (weback_data.Request_Result != 'success') {
-      this.log('Could not authenticate'); return;
+      this.log('Could not authenticate: ', weback_data ); return;
     }
 
     this.region = weback_data['Region_Info'];
@@ -133,6 +133,7 @@ module.exports = class Weback {
     return new Promise(async (resolve, reject) => {
       let session = this.aws_session;
       if (!session) session = await this.get_session();
+      if (!session) return;
 
       var params = {
         FunctionName: 'Device_Manager_V2',
