@@ -34,13 +34,14 @@ export class SwitchAccessory {
     this.ws = accessory.context.ws;
     this.device = accessory.context.device;
     //this.weback = weback;
+    const firmware = this.device.thing_status.firmware_version || this.device.thing_status.vendor_firmware_version;
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tesvor')
       .setCharacteristic(this.platform.Characteristic.Model, this.device.sub_type)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.device.thing_name)
-      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.device.thing_status.firmware_version || this.device.thing_status.vendor_firmware_version);
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, firmware);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -71,11 +72,11 @@ export class SwitchAccessory {
     const intervalTime = 30; //sec
     let interval;
 
-    this.ws.on('error', (error) => {
+    this.ws.on('error', () => {
       //this.log.debug('websocket communication error: %s', error);
       clearInterval(interval);
     });
-    this.ws.on('closed', (url) => {
+    this.ws.on('closed', () => {
       //this.log.debug('websocket connection to %s closed - retrying in 15s', url);
       clearInterval(interval);
     });
@@ -125,7 +126,7 @@ export class SwitchAccessory {
     //const mode = this.state.On ? 'AutoClean' : 'BackCharging' //Standby
     const mode = this.state.On ? this.accessory.context.modes.startMode : this.accessory.context.modes.stopMode;
     const payload = {
-      'topic_name': '$aws\/things\/'+ this.device.thing_name +'\/shadow\/update',
+      'topic_name': '$aws/things/'+ this.device.thing_name +'/shadow/update',
       'opt': 'send_to_device',
       'sub_type': this.device.sub_type,
       'topic_payload': { 'state': { 'working_status': mode } },

@@ -35,6 +35,7 @@
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
     "version": "auto-changelog -p -u && git add CHANGELOG.md && git push --tags",
+    "changelog": "auto-changelog -p -u",
     "prepush": "npm run version"
   },
   "keywords": [
