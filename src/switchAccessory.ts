@@ -21,7 +21,8 @@ export class SwitchAccessory {
   };
 
   private weback;
-  private client;
+  private ws;
+  private device;
 
   constructor(
     private readonly platform: TesvorPlatform,
@@ -29,15 +30,17 @@ export class SwitchAccessory {
     public readonly log: Logger,
   ) {
     // weback
-    const weback = accessory.context.weback;
-    this.weback = weback;
+    //const weback = accessory.context.weback;
+    this.ws = accessory.context.ws;
+    this.device = accessory.context.device;
+    //this.weback = weback;
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tesvor')
-      .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device.thingName)
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device.attributes.mac)
-      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device.attributes.firmware_version);
+      .setCharacteristic(this.platform.Characteristic.Model, this.device.sub_type)
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.device.thing_name)
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.device.thing_status.firmware_version || this.device.thing_status.vendor_firmware_version);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -65,106 +68,51 @@ export class SwitchAccessory {
     batteryService.getCharacteristic(this.platform.Characteristic.BatteryLevel)
       .onGet(this.handleBatteryLevelGet.bind(this));
 
-    //const _this = this
-    this.weback.getConnection().then((client) => {
-      this.client = client;
-      const deviceTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/update/delta';
-      const getTopic = '$aws/things/' + accessory.context.device.thingName + '/shadow/get';
-      const getTopicAccepted = '$aws/things/' + accessory.context.device.thingName + '/shadow/get/accepted';
+    const intervalTime = 30; //sec
+    let interval;
 
-      client.subscribe(deviceTopic);
-      client.subscribe(getTopicAccepted);
-      client.publish(getTopic, '');
-
-      client.on('message', (topic, msg) => {
-        if (!topic.includes(accessory.context.device.thingName)) return;
-        if (!Object.prototype.hasOwnProperty.call(JSON.parse(msg.toString()), 'state')) return;
-        //console.log(topic)
-        //console.log(JSON.parse(msg.toString())
-        const message = JSON.parse(msg.toString());
-        // Object.prototype.hasOwnProperty.call(foo, "bar")
-        // message.state.hasOwnProperty('working_status')
-        //this.log.debug(message)
-        //this.log.debug(Object.prototype.hasOwnProperty.call(message.state, 'working_status').toString())
-        if (Object.prototype.hasOwnProperty.call(message.state, 'working_status')) {
-          //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
-          const mode = message.state.working_status;
-          const state = vacuum.isCleaning(mode);
-          const isCharging = vacuum.isCharging(mode);
-          this.state.Charging = isCharging;
-          this.state.On = state;
-          this.log.debug(accessory.context.nickname, mode);
-          //_this.log.debug(state)
-          this.service.updateCharacteristic(this.platform.Characteristic.On, state);
-          batteryService.updateCharacteristic(this.platform.Characteristic.ChargingState, isCharging);
-        }
-        if (!Object.prototype.hasOwnProperty.call(JSON.parse(msg.toString()).state, 'reported')) return;
-        if (Object.prototype.hasOwnProperty.call(message.state.reported, 'working_status')) {
-          //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
-          const mode = message.state.reported.working_status;
-          const state = vacuum.isCleaning(mode);
-          const isCharging = vacuum.isCharging(mode);
-          this.state.Charging = isCharging;
-          this.state.On = state;
-          this.log.debug(accessory.context.nickname, mode);
-          //_this.log.debug(state)
-          this.service.updateCharacteristic(this.platform.Characteristic.On, state);
-          batteryService.updateCharacteristic(this.platform.Characteristic.ChargingState, isCharging);
-        }
-        if (Object.prototype.hasOwnProperty.call(message.state.reported, 'battery_level')) {
-          //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
-          const battery_level = message.state.reported.battery_level;
-          this.state.BatteryLevel = battery_level;
-          this.log.debug(accessory.context.nickname, battery_level);
-          batteryService.updateCharacteristic(this.platform.Characteristic.BatteryLevel, battery_level);
-        }
-      });
+    this.ws.on('error', (error) => {
+      //this.log.debug('websocket communication error: %s', error);
+      clearInterval(interval);
     });
+    this.ws.on('closed', (url) => {
+      //this.log.debug('websocket connection to %s closed - retrying in 15s', url);
+      clearInterval(interval);
+    });
+    this.ws.on('listening', (url) => {
+      this.log.debug('%s - websocket listening on %s', this.device.thing_name, url);
+      this.ws.getUpdate(this.device);
+      interval = setInterval( () => {
+        this.ws.getUpdate(this.device);
+      }, intervalTime * 1000);
+    });
+    this.ws.on('notification', (obj) => {
+      if (obj.thing_name !== this.device.thing_name) return;
+      this.log.debug('%s - notification received', this.device.thing_name);
 
+      if (obj.notify_info !== 'thing_status_update') return;
 
-    // // register handlers for the Brightness Characteristic
-    // this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-    //   .onSet(this.setBrightness.bind(this));       // SET - bind to the 'setBrightness` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same sub type id.)
-     */
-
-    // Example: add two "motion sensor" services to the accessory
-    // const motionSensorOneService = this.accessory.getService('Motion Sensor One Name') ||
-    //   this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
-
-    // const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name') ||
-    //   this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-
-    /**
-     * Updating characteristics values asynchronously.
-     *
-     * Example showing how to update the state of a Characteristic asynchronously instead
-     * of using the `on('get')` handlers.
-     * Here we change update the motion sensor trigger states on and off every 10 seconds
-     * the `updateCharacteristic` method.
-     *
-     */
-    //let motionDetected = false;
-    // setInterval(() => {
-    //   // EXAMPLE - inverse the trigger
-    //   motionDetected = !motionDetected;
-
-    //   // push the new value to HomeKit
-    //   motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-    //   motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
-
-    //   this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
-    //   this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    // }, 10000);
+      if (Object.prototype.hasOwnProperty.call(obj.thing_status, 'working_status')) {
+        //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
+        const mode = obj.thing_status.working_status;
+        const state = vacuum.isCleaning(mode);
+        const isCharging = vacuum.isCharging(mode);
+        this.state.Charging = isCharging;
+        this.state.On = state;
+        this.log.debug(accessory.context.nickname, mode);
+        this.log.debug(accessory.context.nickname, state);
+        this.service.updateCharacteristic(this.platform.Characteristic.On, state);
+        batteryService.updateCharacteristic(this.platform.Characteristic.ChargingState, isCharging);
+      }
+      if (Object.prototype.hasOwnProperty.call(obj.thing_status, 'battery_level')) {
+        //var mode = JSON.parse(msg.toString()).state.working_status == 'AutoClean' ? true : false
+        const battery_level = obj.thing_status.battery_level;
+        this.state.BatteryLevel = battery_level;
+        this.log.debug(accessory.context.nickname, battery_level);
+        batteryService.updateCharacteristic(this.platform.Characteristic.BatteryLevel, battery_level);
+      }
+      //console.log(obj)
+    });
   }
 
   /**
@@ -176,14 +124,19 @@ export class SwitchAccessory {
     this.state.On = value as boolean;
     //const mode = this.state.On ? 'AutoClean' : 'BackCharging' //Standby
     const mode = this.state.On ? this.accessory.context.modes.startMode : this.accessory.context.modes.stopMode;
-    //this.weback.publish_device_msg(this.accessory.context.device.thingName, { working_status: mode });
-    const topic = '$aws/things/' + this.accessory.context.device.thingName + '/shadow/update';
     const payload = {
-      state: {
-        desired: { working_status: mode },
-      },
+      'topic_name': '$aws\/things\/'+ this.device.thing_name +'\/shadow\/update',
+      'opt': 'send_to_device',
+      'sub_type': this.device.sub_type,
+      'topic_payload': { 'state': { 'working_status': mode } },
+      'thing_name': this.device.thing_name,
     };
-    this.client.publish(topic, JSON.stringify(payload));
+    this.ws.send(payload);
+
+    // get state
+    setTimeout(() => {
+      this.ws.getUpdate(this.device);
+    }, 1000);
 
     this.platform.log.debug('Set Characteristic On ->', value);
   }
@@ -208,8 +161,7 @@ export class SwitchAccessory {
     this.platform.log.debug('Get Characteristic On ->', isOn);
 
     // get state
-    const topic = '$aws/things/' + this.accessory.context.device.thingName + '/shadow/get';
-    this.client.publish(topic, '');
+    this.ws.getUpdate(this.device);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -221,7 +173,7 @@ export class SwitchAccessory {
     // set this to a valid value for StatusLowBattery
     const batteryLevel = this.state.BatteryLevel;
     let state = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-    if(batteryLevel < 20){
+    if (batteryLevel < 20) {
       state = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
     }
 
@@ -233,16 +185,4 @@ export class SwitchAccessory {
     const batteryLevel = this.state.BatteryLevel;
     return batteryLevel;
   }
-
-  /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
-   */
-  // async setBrightness(value: CharacteristicValue) {
-  //   // implement your own code to set the brightness
-  //   this.exampleStates.Brightness = value as number;
-
-  //   this.platform.log.debug('Set Characteristic Brightness -> ', value);
-  // }
-
 }
