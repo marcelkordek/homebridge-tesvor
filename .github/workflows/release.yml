@@ -16,7 +16,7 @@ jobs:
         uses: docker://antonyurchenko/git-release:latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          #CHANGELOG_FILE: "CHANGELOG.md"
-          #ALLOW_EMPTY_CHANGELOG: "false"
+          CHANGELOG_FILE: "CHANGELOG.md"
+          ALLOW_EMPTY_CHANGELOG: "false"
         with:
           args: build/*.zip
