@@ -18,6 +18,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHANGELOG_FILE: "CHANGELOG.md"
           ALLOW_EMPTY_CHANGELOG: "false"
-          TAG_PREFIX_REGEX: "[a-z-]*"
+          TAG_PREFIX_REGEX: "*"
         with:
           args: build/*.zip
