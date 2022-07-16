@@ -58,7 +58,7 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
   async discoverDevices() {
     //const _this = this;
     //this.log.info('Config', this.config);
-    const weback = new Weback(this.log, this.config.username, this.config.password, this.config.country);
+    const weback = new Weback(this.log, this.config.username, this.config.password, this.config.country, this.config.appName);
 
     const startMode = this.config.startMode || 'AutoClean';
     const stopMode = this.config.stopMode || 'Standby';
@@ -94,7 +94,6 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
 
         if (existingAccessory) {
           this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-          existingAccessory.context.ws = ws;
           existingAccessory.context.device = device;
           existingAccessory.context.nickname = nickname;
           existingAccessory.context.weback = weback;
@@ -103,16 +102,16 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
           this.api.updatePlatformAccessories([existingAccessory]);
           switch (accessoryType) {
             case 'TV':
+              existingAccessory.context.ws = ws;
               new TVAccessory(this, existingAccessory, this.log);
               break;
             default:
-              new SwitchAccessory(this, existingAccessory, this.log);
+              new SwitchAccessory(this, existingAccessory, this.log, this.config.fanMode, ws);
               break;
           }
         } else {
           this.log.info('Adding new accessory:', nickname);
           const accessory = new this.api.platformAccessory(nickname, uuid);
-          accessory.context.ws = ws;
           accessory.context.device = device;
           accessory.context.nickname = nickname;
           accessory.context.weback = weback;
@@ -120,11 +119,12 @@ export class TesvorPlatform implements DynamicPlatformPlugin {
           accessory.context.tv = { accessoryType: accessoryType, accessoryCategory: accessoryCategory };
           switch (accessoryType) {
             case 'TV':
+              accessory.context.ws = ws;
               new TVAccessory(this, accessory, this.log);
               this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
               break;
             default:
-              new SwitchAccessory(this, accessory, this.log);
+              new SwitchAccessory(this, accessory, this.log, this.config.fanMode, ws);
               this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
               break;
           }

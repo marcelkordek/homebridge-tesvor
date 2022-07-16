@@ -4,12 +4,13 @@ const got = require('got');
 const crypto = require('crypto');
 
 export class Weback {
-  constructor(log, username, password, region) {
+  constructor(log, username, password, region, app_name) {
     // Creds for WeBack API
     this.log = log;
     this.username = username;
     this.password = password;
     this.country_code = region;
+    this.app_name = app_name;
 
     // Expiration time of session
     this.expiration_time;
@@ -45,7 +46,7 @@ export class Weback {
         },
         'header': {
           'language': 'de',
-          'app_name': 'WeBack',
+          'app_name': this.app_name,
           'calling_code': this.country_code,
           'api_version': '1.0',
           'account': this.username,
