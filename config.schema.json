@@ -24,8 +24,8 @@
         "title": "Country",
         "type": "string",
         "required": true,
-        "default": "+49",
-        "description": "Country-Code e.g +49 for Germany"
+        "default": "0049",
+        "description": "Country-Code e.g 0049 for Germany"
       },
       "accessoryType": {
         "title": "Accessory Type",
@@ -77,6 +77,28 @@
           { "title": "Standby", "enum": ["Standby"] }
         ],
         "description": "Select the Stop Mode",
+        "required": true
+      },
+      "fanMode": {
+        "title": "Fan Mode",
+        "type": "string",
+        "default": "Normal",
+        "oneOf": [
+          { "title": "Normal", "enum": ["Normal"] },
+          { "title": "Strong", "enum": ["Strong"] }
+        ],
+        "description": "Select the Fan Mode",
+        "required": true
+      },
+      "appName": {
+        "title": "App Name",
+        "type": "string",
+        "default": "WeBack",
+        "oneOf": [
+          { "title": "WeBack", "enum": ["WeBack"] },
+          { "title": "Redmond", "enum": ["Redmond"] }
+        ],
+        "description": "Select the App Name",
         "required": true
       }
     }

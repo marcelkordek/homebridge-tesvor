@@ -1,5 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue, Logger } from 'homebridge';
 import { TesvorPlatform } from './platform';
+import { WsMonitor } from './lib/WsMonitor.js';
 const vacuum = require('./lib/vacuum.js');
 
 /**
@@ -20,18 +21,20 @@ export class SwitchAccessory {
     Charging: true,
   };
 
-  private weback;
-  private ws;
+  // private weback;
+  // private ws;
   private device;
 
   constructor(
     private readonly platform: TesvorPlatform,
     private readonly accessory: PlatformAccessory,
     public readonly log: Logger,
+    private readonly fan_mode: String,
+    private readonly ws: WsMonitor
   ) {
     // weback
     //const weback = accessory.context.weback;
-    this.ws = accessory.context.ws;
+    // this.ws = accessory.context.ws;
     this.device = accessory.context.device;
     //this.weback = weback;
     const firmware = this.device.thing_status.firmware_version || this.device.thing_status.vendor_firmware_version;
@@ -138,7 +141,18 @@ export class SwitchAccessory {
     setTimeout(() => {
       this.ws.getUpdate(this.device);
     }, 1000);
-
+    if (value && this.fan_mode == 'Strong') {
+      setTimeout(() => {
+            const fan_payload = {
+                'topic_name': '$aws/things/' + this.device.thing_name + '/shadow/update',
+                'opt': 'send_to_device',
+                'sub_type': this.device.sub_type,
+                'topic_payload': { 'state': { 'fan_status': 'Strong' } },
+                'thing_name': this.device.thing_name,
+            };
+            this.ws.send(fan_payload);
+        }, 3000);
+    }
     this.platform.log.debug('Set Characteristic On ->', value);
   }
 
