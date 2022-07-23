@@ -29,8 +29,8 @@ export class SwitchAccessory {
     private readonly platform: TesvorPlatform,
     private readonly accessory: PlatformAccessory,
     public readonly log: Logger,
-    private readonly fan_mode: String,
-    private readonly ws: WsMonitor
+    private readonly fan_mode: string,
+    private readonly ws: WsMonitor,
   ) {
     // weback
     //const weback = accessory.context.weback;
@@ -141,17 +141,17 @@ export class SwitchAccessory {
     setTimeout(() => {
       this.ws.getUpdate(this.device);
     }, 1000);
-    if (value && this.fan_mode == 'Strong') {
+    if (value && this.fan_mode === 'Strong') {
       setTimeout(() => {
-            const fan_payload = {
-                'topic_name': '$aws/things/' + this.device.thing_name + '/shadow/update',
-                'opt': 'send_to_device',
-                'sub_type': this.device.sub_type,
-                'topic_payload': { 'state': { 'fan_status': 'Strong' } },
-                'thing_name': this.device.thing_name,
-            };
-            this.ws.send(fan_payload);
-        }, 3000);
+        const fan_payload = {
+          'topic_name': '$aws/things/' + this.device.thing_name + '/shadow/update',
+          'opt': 'send_to_device',
+          'sub_type': this.device.sub_type,
+          'topic_payload': { 'state': { 'fan_status': 'Strong' } },
+          'thing_name': this.device.thing_name,
+        };
+        this.ws.send(fan_payload);
+      }, 3000);
     }
     this.platform.log.debug('Set Characteristic On ->', value);
   }
