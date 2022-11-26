@@ -37,14 +37,15 @@ export class SwitchAccessory {
     // this.ws = accessory.context.ws;
     this.device = accessory.context.device;
     //this.weback = weback;
-    const firmware = this.device.thing_status.firmware_version || this.device.thing_status.vendor_firmware_version;
+
+    const firmware = this.device.thing_status.firmware_version || this.device.thing_status.vendor_firmware_version || 'unknown';
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tesvor')
       .setCharacteristic(this.platform.Characteristic.Model, this.device.sub_type)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.device.thing_name)
-      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, firmware);
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, firmware.toString());
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
